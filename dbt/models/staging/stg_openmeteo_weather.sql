@@ -43,3 +43,4 @@ extracted as (
 )
 
 select * from extracted
+

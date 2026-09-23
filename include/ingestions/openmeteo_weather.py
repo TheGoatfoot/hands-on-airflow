@@ -66,7 +66,9 @@ def fetch_and_load_openmeteo_weather(
 
     if data.get("error") is True:
         reason = data.get("reason", "Unknown API error")
-        raise RuntimeError(f"Open-Meteo API Error: {reason} (city={city}, date={ds})")
+        raise RuntimeError(
+            f"Open-Meteo API Error: {reason} (city={city}, date={ds})"
+        )
 
     upsert_sql = """
         INSERT INTO raw_openmeteo_weather (city, observation_date, latitude, longitude, payload, ingested_at)
@@ -89,3 +91,4 @@ def fetch_and_load_openmeteo_weather(
         city,
         ds,
     )
+

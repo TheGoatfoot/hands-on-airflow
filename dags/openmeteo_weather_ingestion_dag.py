@@ -52,3 +52,4 @@ with DAG(
     )
 
     init_table >> ingest_weather
+
