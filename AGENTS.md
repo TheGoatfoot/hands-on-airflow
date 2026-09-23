@@ -10,7 +10,7 @@ This project is an ELT / ETL data pipeline orchestrated with **Apache Airflow**,
 
 - **Airflow Orchestrator**: Apache Airflow 2.9.3 running via Docker Compose (`docker-compose.yaml`).
 - **Transformation Engine**: **dbt** (`dbt-postgres`) orchestrated into native Airflow tasks via **Astronomer Cosmos** (`astronomer-cosmos`).
-- **Python Tooling & Virtualenv**: Managed locally via **`uv`** (Python 3.12).
+- **Python Tooling & Virtualenv**: Managed locally via **`uv`** (Python 3.11).
 - **Airflow Metadata Database**: PostgreSQL 16 container (`airflow-postgres`).
 - **Target Data Warehouse**: PostgreSQL 16 container (`dw-postgres`).
   - Container hostname: `dw-postgres:5432`

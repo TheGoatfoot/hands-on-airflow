@@ -3,7 +3,7 @@ name = "hands-on-airflow"
 version = "0.1.0"
 description = "Hands-on data pipeline using Apache Airflow and dbt on Postgres"
 readme = "README.md"
-requires-python = ">=3.11"
+requires-python = ">=3.11,<3.12"
 dependencies = [
     "apache-airflow==2.9.3",
     "apache-airflow-providers-postgres>=5.0.0",

@@ -35,7 +35,7 @@ flowchart LR
 - **Orchestrator**: [Apache Airflow 2.9.3](https://airflow.apache.org/) (`LocalExecutor` in Docker Compose).
 - **Transformation Engine**: [dbt-core](https://www.getdbt.com/) (`dbt-postgres` 1.9) orchestrated dynamically into native Airflow tasks using [Astronomer Cosmos](https://astronomer.github.io/astronomer-cosmos/) 1.15.
 - **Data Warehouse**: [PostgreSQL 16](https://www.postgresql.org/) (Container: `dw-postgres:5432`, Host port: `localhost:5433`).
-- **Python Environment**: Managed locally via [`uv`](https://github.com/astral-sh/uv) (Python 3.12).
+- **Python Environment**: Managed locally via [`uv`](https://github.com/astral-sh/uv) (Python 3.11).
 
 ---
 
