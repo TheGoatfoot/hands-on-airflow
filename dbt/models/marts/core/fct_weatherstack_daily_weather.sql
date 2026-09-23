@@ -6,7 +6,7 @@ cities as (
     select
         city_sk,
         city
-    from {{ ref('dim_weatherstack_cities') }}
+    from {{ ref('dim_cities') }}
 ),
 
 final as (

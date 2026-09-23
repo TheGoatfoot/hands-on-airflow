@@ -17,8 +17,8 @@ models:
         data_tests:
           - not_null
 
-  - name: dim_weatherstack_cities
-    description: "Conformed dimension table for weather-monitored cities (Silver Layer). Grain: One row per city."
+  - name: dim_cities
+    description: "Conformed dimension table for weather-monitored cities across providers (Silver Layer). Grain: One row per city."
     columns:
       - name: city_sk
         description: "Surrogate key for city (MD5 hash of lowercase trimmed city name)."
@@ -30,13 +30,17 @@ models:
         data_tests:
           - unique
           - not_null
-      - name: country
-        description: "Country where the city is located."
+      - name: latitude
+        description: "Latitude coordinate of the city."
+        data_tests:
+          - not_null
+      - name: longitude
+        description: "Longitude coordinate of the city."
         data_tests:
           - not_null
 
   - name: fct_weatherstack_daily_weather
-    description: "Daily weather observations fact table (Silver Layer). Grain: One row per city per observation date."
+    description: "Daily weather observations fact table from Weatherstack (Silver Layer). Grain: One row per city per observation date."
     columns:
       - name: weather_observation_sk
         description: "Surrogate key for observation (MD5 hash of city and observation_date)."
@@ -44,11 +48,11 @@ models:
           - unique
           - not_null
       - name: city_sk
-        description: "Foreign key referencing dim_weatherstack_cities."
+        description: "Foreign key referencing dim_cities."
         data_tests:
           - not_null
           - relationships:
-              to: ref('dim_weatherstack_cities')
+              to: ref('dim_cities')
               field: city_sk
       - name: observation_date
         description: "Date of the weather observation."
@@ -66,6 +70,30 @@ models:
         description: "Monitored city name."
         data_tests:
           - not_null
+      - name: observation_date
+        description: "Date of the weather observation."
+        data_tests:
+          - not_null
+      - name: temperature_2m_mean_c
+        description: "Mean daily temperature at 2 meters above ground in Celsius."
+        data_tests:
+          - not_null
+
+  - name: fct_openmeteo_daily_weather
+    description: "Daily weather observations fact table from Open-Meteo (Silver Layer). Grain: One row per city per observation date."
+    columns:
+      - name: weather_observation_sk
+        description: "Surrogate key for observation (MD5 hash of city and observation_date)."
+        data_tests:
+          - unique
+          - not_null
+      - name: city_sk
+        description: "Foreign key referencing dim_cities."
+        data_tests:
+          - not_null
+          - relationships:
+              to: ref('dim_cities')
+              field: city_sk
       - name: observation_date
         description: "Date of the weather observation."
         data_tests:
