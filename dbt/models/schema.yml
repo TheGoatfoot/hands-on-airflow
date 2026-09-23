@@ -15,12 +15,16 @@ models:
           - not_null
 
   - name: dim_customers
-    description: "Dimension table containing consolidated customer profiles."
+    description: "Conformed customer dimension table (Silver Layer). Grain: One row per customer account."
     columns:
-      - name: customer_id
-        description: "Primary key for customer dimension."
+      - name: customer_sk
+        description: "Surrogate key for customer dimension (MD5 hash of natural key)."
         data_tests:
           - unique
+          - not_null
+      - name: customer_id
+        description: "Natural key from source system."
+        data_tests:
           - not_null
       - name: email
         description: "Customer email address."

@@ -4,6 +4,7 @@ with customers as (
 
 final as (
     select
+        md5(cast(customer_id as text)) as customer_sk,
         customer_id,
         first_name,
         last_name,
