@@ -25,3 +25,24 @@ sources:
             data_tests:
               - not_null
 
+      - name: raw_openmeteo_weather
+        description: "Raw API response landing table for Open-Meteo Historical Weather observations."
+        columns:
+          - name: city
+            description: "City name queried."
+            data_tests:
+              - not_null
+          - name: observation_date
+            description: "Date of the observation."
+            data_tests:
+              - not_null
+          - name: payload
+            description: "Full JSONB payload returned from Open-Meteo Historical API."
+            data_tests:
+              - not_null
+          - name: ingested_at
+            description: "Timestamp when the record was loaded into PostgreSQL."
+            data_tests:
+              - not_null
+
+

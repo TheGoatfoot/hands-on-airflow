@@ -59,4 +59,21 @@ models:
         data_tests:
           - not_null
 
+  - name: stg_openmeteo_weather
+    description: "Bronze staging view extracting and cleaning raw Open-Meteo Historical Weather observations."
+    columns:
+      - name: city
+        description: "Monitored city name."
+        data_tests:
+          - not_null
+      - name: observation_date
+        description: "Date of the weather observation."
+        data_tests:
+          - not_null
+      - name: temperature_2m_mean_c
+        description: "Mean daily temperature at 2 meters above ground in Celsius."
+        data_tests:
+          - not_null
+
+
 
