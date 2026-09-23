@@ -30,8 +30,8 @@ with DAG(
     default_args=default_args,
     description="Ingest daily weather observations from Weatherstack API at 12 PM UTC+7 into PostgreSQL DW",
     schedule="0 12 * * *",
-    start_date=pendulum.datetime(2026, 9, 16, tz="Asia/Jakarta"),
-    catchup=True,
+    start_date=pendulum.datetime(2026, 9, 23, tz="Asia/Jakarta"),
+    catchup=False,
     max_active_runs=1,
     tags=["weatherstack", "weather", "ingestion", "raw"],
 ) as dag:
