@@ -6,3 +6,4 @@ CREATE TABLE IF NOT EXISTS raw_weatherstack_weather (
     ingested_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
     PRIMARY KEY (city, observation_date)
 );
+

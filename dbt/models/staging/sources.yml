@@ -24,3 +24,4 @@ sources:
             description: "Timestamp when the record was loaded into PostgreSQL."
             data_tests:
               - not_null
+
