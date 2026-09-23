@@ -1,36 +1,6 @@
 version: 2
 
 models:
-  - name: stg_customers
-    description: "Staging view for cleaned raw customer data."
-    columns:
-      - name: customer_id
-        description: "Primary key for customer."
-        data_tests:
-          - unique
-          - not_null
-      - name: email
-        description: "Customer email address."
-        data_tests:
-          - not_null
-
-  - name: dim_customers
-    description: "Conformed customer dimension table (Silver Layer). Grain: One row per customer account."
-    columns:
-      - name: customer_sk
-        description: "Surrogate key for customer dimension (MD5 hash of natural key)."
-        data_tests:
-          - unique
-          - not_null
-      - name: customer_id
-        description: "Natural key from source system."
-        data_tests:
-          - not_null
-      - name: email
-        description: "Customer email address."
-        data_tests:
-          - not_null
-
   - name: stg_weatherstack_weather
     description: "Bronze staging view extracting and cleaning raw Weatherstack API observation JSON payloads."
     columns:

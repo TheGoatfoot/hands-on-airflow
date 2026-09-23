@@ -97,4 +97,3 @@ def fetch_and_load_weatherstack_weather(
         city,
         ds,
     )
-
