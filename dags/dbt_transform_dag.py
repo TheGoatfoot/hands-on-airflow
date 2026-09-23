@@ -11,6 +11,7 @@ from cosmos import (
     ProjectConfig,
     RenderConfig,
 )
+from cosmos.profiles import PostgresUserPasswordProfileMapping
 
 # Resolve path for both container (/opt/airflow/dbt) and local host development
 if os.path.exists("/opt/airflow/dbt"):
@@ -18,11 +19,23 @@ if os.path.exists("/opt/airflow/dbt"):
 else:
     DBT_PROJECT_PATH = Path(__file__).resolve().parents[1] / "dbt"
 
-profile_config = ProfileConfig(
-    profile_name="dw_postgres",
-    target_name="dev",
-    profiles_yml_filepath=DBT_PROJECT_PATH / "profiles.yml",
-)
+# If environment variables are set (e.g. via .env or container env), use profiles.yml;
+# otherwise fallback to Airflow Connection / Secrets Backend (conn_id: postgres_dw)
+if os.environ.get("DBT_USER") and os.environ.get("DBT_PASSWORD"):
+    profile_config = ProfileConfig(
+        profile_name="dw_postgres",
+        target_name="dev",
+        profiles_yml_filepath=DBT_PROJECT_PATH / "profiles.yml",
+    )
+else:
+    profile_config = ProfileConfig(
+        profile_name="dw_postgres",
+        target_name="dev",
+        profile_mapping=PostgresUserPasswordProfileMapping(
+            conn_id="postgres_dw",
+            profile_args={"schema": os.environ.get("DBT_SCHEMA", "public")},
+        ),
+    )
 
 with DAG(
     dag_id="dbt_transform_dag",
