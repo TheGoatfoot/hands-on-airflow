@@ -39,7 +39,7 @@ flowchart LR
 
 ---
 
-## 2. Quickstart for Humans
+## 2. Quickstart
 
 ### 1. Prerequisites
 - [Docker](https://docs.docker.com/get-docker/) & Docker Compose (or Podman with `podman-compose`).
