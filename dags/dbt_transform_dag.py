@@ -1,5 +1,5 @@
 import os
-from datetime import datetime
+from datetime import UTC, datetime
 from pathlib import Path
 
 from airflow import DAG
@@ -40,7 +40,7 @@ else:
 with DAG(
     dag_id="dbt_transform_dag",
     description="Orchestrates dbt transformations against Postgres Data Warehouse using Cosmos",
-    start_date=datetime(2026, 1, 1),
+    start_date=datetime(2026, 1, 1, tzinfo=UTC),
     schedule=None,  # Manual trigger or triggered by upstream ingestion DAGs
     catchup=False,
     tags=["dbt", "transformation", "data_warehouse"],
@@ -56,4 +56,3 @@ with DAG(
             emit_datasets=False,
         ),
     )
-

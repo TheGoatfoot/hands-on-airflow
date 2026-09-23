@@ -3,19 +3,19 @@ x-airflow-common: &airflow-common
   environment:
     &airflow-common-env
     AIRFLOW__CORE__EXECUTOR: LocalExecutor
-    AIRFLOW__DATABASE__SQL_ALCHEMY_CONN: postgresql+psycopg2://${AIRFLOW_DB_USER:-airflow}:${AIRFLOW_DB_PASSWORD:-airflow}@airflow-postgres:5432/${AIRFLOW_DB_NAME:-airflow}
-    AIRFLOW__CORE__FERNET_KEY: ${AIRFLOW_FERNET_KEY:-}
+    AIRFLOW__DATABASE__SQL_ALCHEMY_CONN: postgresql+psycopg2://${AIRFLOW_DB_USER:-airflow}:${AIRFLOW_DB_PASSWORD:?AIRFLOW_DB_PASSWORD must be set in .env}@airflow-postgres:5432/${AIRFLOW_DB_NAME:-airflow}
+    AIRFLOW__CORE__FERNET_KEY: ${AIRFLOW_FERNET_KEY:?AIRFLOW_FERNET_KEY must be set in .env}
     AIRFLOW__CORE__DAGS_ARE_PAUSED_AT_CREATION: 'true'
     AIRFLOW__CORE__LOAD_EXAMPLES: 'false'
     AIRFLOW__API__AUTH_BACKENDS: 'airflow.api.auth.backend.basic_auth,airflow.api.auth.backend.session'
     AIRFLOW__SCHEDULER__MIN_FILE_PROCESS_INTERVAL: 30
     # Pre-configure Airflow connection to your Postgres Data Warehouse
-    AIRFLOW_CONN_POSTGRES_DW: postgresql://${DW_USER:-dw_user}:${DW_PASSWORD:-dw_password}@dw-postgres:5432/${DW_DB:-warehouse}
+    AIRFLOW_CONN_POSTGRES_DW: postgresql://${DW_USER:-dw_user}:${DW_PASSWORD:?DW_PASSWORD must be set in .env}@dw-postgres:5432/${DW_DB:-warehouse}
     _PIP_ADDITIONAL_REQUIREMENTS: "astronomer-cosmos==1.15.1 dbt-core==1.8.7 dbt-postgres==1.9.1 dbt-adapters==1.9.0 dbt-common==1.12.0"
     DBT_HOST: dw-postgres
     DBT_PORT: "5432"
     DBT_USER: ${DW_USER:-dw_user}
-    DBT_PASSWORD: ${DW_PASSWORD:-dw_password}
+    DBT_PASSWORD: ${DW_PASSWORD:?DW_PASSWORD must be set in .env}
     DBT_DBNAME: ${DW_DB:-warehouse}
   volumes:
     - ./dags:/opt/airflow/dags:z
@@ -37,7 +37,7 @@ services:
     container_name: airflow-postgres
     environment:
       POSTGRES_USER: ${AIRFLOW_DB_USER:-airflow}
-      POSTGRES_PASSWORD: ${AIRFLOW_DB_PASSWORD:-airflow}
+      POSTGRES_PASSWORD: ${AIRFLOW_DB_PASSWORD:?AIRFLOW_DB_PASSWORD must be set in .env}
       POSTGRES_DB: ${AIRFLOW_DB_NAME:-airflow}
     volumes:
       - airflow-db-volume:/var/lib/postgresql/data
@@ -65,7 +65,7 @@ services:
           --lastname "${AIRFLOW_ADMIN_LASTNAME:-Admin}" \
           --role Admin \
           --email "${AIRFLOW_ADMIN_EMAIL:-admin@example.com}" \
-          --password "${AIRFLOW_ADMIN_PASSWORD:-admin}"
+          --password "${AIRFLOW_ADMIN_PASSWORD:?AIRFLOW_ADMIN_PASSWORD must be set in .env}"
     restart: on-failure
 
   # -------------------------------------------------------------
@@ -76,7 +76,7 @@ services:
     container_name: airflow-webserver
     command: webserver
     ports:
-      - "8080:8080"
+      - "127.0.0.1:8080:8080"
     healthcheck:
       test: ["CMD", "curl", "--fail", "http://localhost:8080/health"]
       interval: 30s
@@ -112,10 +112,10 @@ services:
     container_name: dw-postgres
     environment:
       POSTGRES_USER: ${DW_USER:-dw_user}
-      POSTGRES_PASSWORD: ${DW_PASSWORD:-dw_password}
+      POSTGRES_PASSWORD: ${DW_PASSWORD:?DW_PASSWORD must be set in .env}
       POSTGRES_DB: ${DW_DB:-warehouse}
     ports:
-      - "${DW_PORT_HOST:-5433}:5432"  # Mapped to host port to avoid local port collisions
+      - "127.0.0.1:${DW_PORT_HOST:-5433}:5432"  # Mapped to localhost to avoid network exposure
     volumes:
       - dw-volume:/var/lib/postgresql/data
     healthcheck:

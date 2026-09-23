@@ -5,6 +5,7 @@ description = "Hands-on data pipeline using Apache Airflow and dbt on Postgres"
 readme = "README.md"
 requires-python = ">=3.11"
 dependencies = [
+    "apache-airflow==2.9.3",
     "astronomer-cosmos>=1.4.0",
     "dbt-postgres>=1.8.0",
 ]
@@ -18,6 +19,8 @@ dev = [
 
 [tool.pytest.ini_options]
 env = [
+    "AIRFLOW_HOME=/tmp/airflow_test_home",
+    "AIRFLOW__CORE__LOAD_EXAMPLES=False",
     "AIRFLOW__COSMOS__ENABLE_CACHE=False",
     "DBT_USER=mock_user",
     "DBT_PASSWORD=mock_password",
