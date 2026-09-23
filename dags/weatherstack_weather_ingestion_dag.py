@@ -11,6 +11,7 @@ PROJECT_ROOT = Path(__file__).resolve().parents[1]
 if str(PROJECT_ROOT) not in sys.path:
     sys.path.insert(0, str(PROJECT_ROOT))
 
+from include.datasets import RAW_WEATHERSTACK_WEATHER_DATASET
 from include.ingestions.weatherstack_weather import (
     fetch_and_load_weatherstack_weather,
     init_raw_weatherstack_weather_table,
@@ -47,6 +48,7 @@ with DAG(
             "city": "Jakarta",
             "ds": "{{ ds }}",
         },
+        outlets=[RAW_WEATHERSTACK_WEATHER_DATASET],
     )
 
     init_table >> ingest_weather

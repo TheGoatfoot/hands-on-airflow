@@ -1,4 +1,5 @@
 import os
+import sys
 from datetime import UTC, datetime
 from pathlib import Path
 
@@ -12,6 +13,16 @@ from cosmos import (
     RenderConfig,
 )
 from cosmos.profiles import PostgresUserPasswordProfileMapping
+
+# Ensure project root is accessible for imports
+PROJECT_ROOT = Path(__file__).resolve().parents[1]
+if str(PROJECT_ROOT) not in sys.path:
+    sys.path.insert(0, str(PROJECT_ROOT))
+
+from include.datasets import (
+    RAW_OPENMETEO_WEATHER_DATASET,
+    RAW_WEATHERSTACK_WEATHER_DATASET,
+)
 
 # Resolve path for both container (/opt/airflow/dbt) and local host development
 if os.path.exists("/opt/airflow/dbt"):
@@ -41,8 +52,9 @@ with DAG(
     dag_id="dbt_transform_dag",
     description="Orchestrates dbt transformations against Postgres Data Warehouse using Cosmos",
     start_date=datetime(2026, 1, 1, tzinfo=UTC),
-    schedule=None,  # Manual trigger or triggered by upstream ingestion DAGs
+    schedule=(RAW_OPENMETEO_WEATHER_DATASET | RAW_WEATHERSTACK_WEATHER_DATASET),
     catchup=False,
+    max_active_runs=1,
     tags=["dbt", "transformation", "data_warehouse"],
 ) as dag:
     dbt_transforms = DbtTaskGroup(

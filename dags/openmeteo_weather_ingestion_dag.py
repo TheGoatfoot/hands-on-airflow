@@ -11,6 +11,7 @@ PROJECT_ROOT = Path(__file__).resolve().parents[1]
 if str(PROJECT_ROOT) not in sys.path:
     sys.path.insert(0, str(PROJECT_ROOT))
 
+from include.datasets import RAW_OPENMETEO_WEATHER_DATASET
 from include.ingestions.openmeteo_weather import (
     fetch_and_load_openmeteo_weather,
     init_raw_openmeteo_weather_table,
@@ -49,6 +50,7 @@ with DAG(
             "longitude": 106.8451,
             "ds": "{{ ds }}",
         },
+        outlets=[RAW_OPENMETEO_WEATHER_DATASET],
     )
 
     init_table >> ingest_weather
