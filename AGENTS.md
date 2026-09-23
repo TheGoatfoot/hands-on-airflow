@@ -65,7 +65,7 @@ hands-on-airflow/
 Airflow DAGs must strictly act as **orchestrators, not execution engines**.
 - **No heavy business logic in `dags/`**: Never place complex data processing, API calls, or heavy SQL transformations directly in the DAG file.
 - **Separation of concerns**:
-  - Keep DAG definitions in `dags/` minimal: define DAG settings, schedules, operator instantiation, and dependency wiring (`>>`).
+  - Use the modern **TaskFlow API** (`@dag` and `@task` decorators) rather than legacy `PythonOperator`. Keep `@task` functions thin by delegating execution to modules in `include/ingestions/`.
   - Use **Astronomer Cosmos** (`cosmos.DbtTaskGroup` or `cosmos.DbtDag`) to delegate SQL modeling, testing, and DAG lineage directly to dbt.
   - Put non-dbt extract/load logic in `include/ingestions/` or `plugins/`.
 

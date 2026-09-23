@@ -3,8 +3,7 @@ from datetime import timedelta
 from pathlib import Path
 
 import pendulum
-from airflow import DAG
-from airflow.operators.python import PythonOperator
+from airflow.decorators import dag, task
 
 # Ensure project root is accessible for imports
 PROJECT_ROOT = Path(__file__).resolve().parents[1]
@@ -26,7 +25,8 @@ default_args = {
     "retry_delay": timedelta(minutes=5),
 }
 
-with DAG(
+
+@dag(
     dag_id="openmeteo_weather_ingestion_dag",
     default_args=default_args,
     description="Ingest daily weather observations from Open-Meteo Historical Weather API at 12 PM UTC+7 into PostgreSQL DW",
@@ -35,22 +35,22 @@ with DAG(
     catchup=True,
     max_active_runs=1,
     tags=["openmeteo", "weather", "ingestion", "raw"],
-) as dag:
-    init_table = PythonOperator(
-        task_id="init_raw_openmeteo_weather_table",
-        python_callable=init_raw_openmeteo_weather_table,
-    )
+)
+def openmeteo_weather_ingestion_dag():
+    @task(task_id="init_raw_openmeteo_weather_table")
+    def init_table():
+        init_raw_openmeteo_weather_table()
 
-    ingest_weather = PythonOperator(
-        task_id="ingest_openmeteo_weather",
-        python_callable=fetch_and_load_openmeteo_weather,
-        op_kwargs={
-            "city": "Jakarta",
-            "latitude": -6.2146,
-            "longitude": 106.8451,
-            "ds": "{{ ds }}",
-        },
-        outlets=[RAW_OPENMETEO_WEATHER_DATASET],
-    )
+    @task(task_id="ingest_openmeteo_weather", outlets=[RAW_OPENMETEO_WEATHER_DATASET])
+    def ingest_weather(ds: str | None = None):
+        fetch_and_load_openmeteo_weather(
+            city="Jakarta",
+            latitude=-6.2146,
+            longitude=106.8451,
+            ds=ds,
+        )
 
-    init_table >> ingest_weather
+    init_table() >> ingest_weather()
+
+
+openmeteo_weather_ingestion_dag()

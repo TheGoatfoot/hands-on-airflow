@@ -3,7 +3,7 @@ import sys
 from datetime import UTC, datetime
 from pathlib import Path
 
-from airflow import DAG
+from airflow.decorators import dag
 from cosmos import (
     DbtTaskGroup,
     ExecutionConfig,
@@ -48,7 +48,8 @@ else:
         ),
     )
 
-with DAG(
+
+@dag(
     dag_id="dbt_transform_dag",
     description="Orchestrates dbt transformations against Postgres Data Warehouse using Cosmos",
     start_date=datetime(2026, 1, 1, tzinfo=UTC),
@@ -56,8 +57,9 @@ with DAG(
     catchup=False,
     max_active_runs=1,
     tags=["dbt", "transformation", "data_warehouse"],
-) as dag:
-    dbt_transforms = DbtTaskGroup(
+)
+def dbt_transform_dag():
+    DbtTaskGroup(
         group_id="dbt_transforms",
         project_config=ProjectConfig(dbt_project_path=DBT_PROJECT_PATH),
         profile_config=profile_config,
@@ -68,3 +70,6 @@ with DAG(
             emit_datasets=False,
         ),
     )
+
+
+dbt_transform_dag()

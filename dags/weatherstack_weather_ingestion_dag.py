@@ -3,8 +3,7 @@ from datetime import timedelta
 from pathlib import Path
 
 import pendulum
-from airflow import DAG
-from airflow.operators.python import PythonOperator
+from airflow.decorators import dag, task
 
 # Ensure project root is accessible for imports
 PROJECT_ROOT = Path(__file__).resolve().parents[1]
@@ -26,7 +25,8 @@ default_args = {
     "retry_delay": timedelta(minutes=5),
 }
 
-with DAG(
+
+@dag(
     dag_id="weatherstack_weather_ingestion_dag",
     default_args=default_args,
     description="Ingest daily weather observations from Weatherstack API at 12 PM UTC+7 into PostgreSQL DW",
@@ -35,20 +35,23 @@ with DAG(
     catchup=False,
     max_active_runs=1,
     tags=["weatherstack", "weather", "ingestion", "raw"],
-) as dag:
-    init_table = PythonOperator(
-        task_id="init_raw_weatherstack_weather_table",
-        python_callable=init_raw_weatherstack_weather_table,
-    )
+)
+def weatherstack_weather_ingestion_dag():
+    @task(task_id="init_raw_weatherstack_weather_table")
+    def init_table():
+        init_raw_weatherstack_weather_table()
 
-    ingest_weather = PythonOperator(
+    @task(
         task_id="ingest_weatherstack_weather",
-        python_callable=fetch_and_load_weatherstack_weather,
-        op_kwargs={
-            "city": "Jakarta",
-            "ds": "{{ ds }}",
-        },
         outlets=[RAW_WEATHERSTACK_WEATHER_DATASET],
     )
+    def ingest_weather(ds: str | None = None):
+        fetch_and_load_weatherstack_weather(
+            city="Jakarta",
+            ds=ds,
+        )
 
-    init_table >> ingest_weather
+    init_table() >> ingest_weather()
+
+
+weatherstack_weather_ingestion_dag()
