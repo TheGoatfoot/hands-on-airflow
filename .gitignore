@@ -1,0 +1,25 @@
+# Airflow
+logs/**/*.log
+logs/**/*/
+!logs/.gitkeep
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+.venv/
+*.egg-info/
+.pytest_cache/
+.ruff_cache/
+
+# dbt
+dbt/target/
+dbt/dbt_packages/
+dbt/logs/
+dbt/modules/
+
+# Environment / local configs
+.env
+.env.local
+.env.*.local
+!.env.example
