@@ -23,6 +23,7 @@ x-airflow-common: &airflow-common
     - ./config:/opt/airflow/config:z
     - ./plugins:/opt/airflow/plugins:z
     - ./dbt:/opt/airflow/dbt:z
+    - ./include:/opt/airflow/include:z
   user: "${AIRFLOW_UID:-50000}:${AIRFLOW_GID:-0}"
   depends_on:
     airflow-postgres:
