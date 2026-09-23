@@ -31,3 +31,62 @@ models:
         data_tests:
           - not_null
 
+  - name: stg_weatherstack_weather
+    description: "Bronze staging view extracting and cleaning raw Weatherstack API observation JSON payloads."
+    columns:
+      - name: city
+        description: "Monitored city name."
+        data_tests:
+          - not_null
+      - name: observation_date
+        description: "Date of the weather observation."
+        data_tests:
+          - not_null
+      - name: temperature_c
+        description: "Observed temperature in Celsius."
+        data_tests:
+          - not_null
+
+  - name: dim_weatherstack_cities
+    description: "Conformed dimension table for weather-monitored cities (Silver Layer). Grain: One row per city."
+    columns:
+      - name: city_sk
+        description: "Surrogate key for city (MD5 hash of lowercase trimmed city name)."
+        data_tests:
+          - unique
+          - not_null
+      - name: city
+        description: "Natural key of the city."
+        data_tests:
+          - unique
+          - not_null
+      - name: country
+        description: "Country where the city is located."
+        data_tests:
+          - not_null
+
+  - name: fct_weatherstack_daily_weather
+    description: "Daily weather observations fact table (Silver Layer). Grain: One row per city per observation date."
+    columns:
+      - name: weather_observation_sk
+        description: "Surrogate key for observation (MD5 hash of city and observation_date)."
+        data_tests:
+          - unique
+          - not_null
+      - name: city_sk
+        description: "Foreign key referencing dim_weatherstack_cities."
+        data_tests:
+          - not_null
+          - relationships:
+              to: ref('dim_weatherstack_cities')
+              field: city_sk
+      - name: observation_date
+        description: "Date of the weather observation."
+        data_tests:
+          - not_null
+      - name: temperature_c
+        description: "Observed temperature in Celsius."
+        data_tests:
+          - not_null
+
+

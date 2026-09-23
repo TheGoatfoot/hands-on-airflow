@@ -44,7 +44,8 @@ hands-on-airflow/
 ├── plugins/               # Custom Airflow operators, hooks, sensors, and macros
 ├── include/               # Modular business logic, SQL files, custom transformations
 │   ├── sql/               # SQL queries / DDL for Data Warehouse
-│   └── transformations/   # Python extraction and load functions
+│   ├── ingestions/        # API extraction and ingestion functions (EL logic)
+│   └── transformations/   # Python transformation logic and data helpers
 ├── tests/                 # Unit tests & DagBag integrity checks
 │   ├── test_dag_integrity.py
 │   └── ...
@@ -66,7 +67,7 @@ Airflow DAGs must strictly act as **orchestrators, not execution engines**.
 - **Separation of concerns**:
   - Keep DAG definitions in `dags/` minimal: define DAG settings, schedules, operator instantiation, and dependency wiring (`>>`).
   - Use **Astronomer Cosmos** (`cosmos.DbtTaskGroup` or `cosmos.DbtDag`) to delegate SQL modeling, testing, and DAG lineage directly to dbt.
-  - Put non-dbt extract/load logic in `include/` or `plugins/`.
+  - Put non-dbt extract/load logic in `include/ingestions/` or `plugins/`.
 
 ### 3.2. Cosmos & dbt Authoring Guidelines
 - **Dual-Path Project Resolution**: Always configure the dbt project path to resolve both inside Docker (`/opt/airflow/dbt`) and on the local host:

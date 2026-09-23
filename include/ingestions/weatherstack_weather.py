@@ -8,19 +8,23 @@ from airflow.providers.postgres.hooks.postgres import PostgresHook
 
 logger = logging.getLogger(__name__)
 
-DDL_FILE_PATH = Path(__file__).resolve().parents[1] / "sql" / "raw_weather.sql"
+DDL_FILE_PATH = (
+    Path(__file__).resolve().parents[1] / "sql" / "raw_weatherstack_weather.sql"
+)
 
 
-def init_raw_weather_table(postgres_conn_id: str = "postgres_dw") -> None:
-    """Ensure the raw_weather landing table exists in PostgreSQL."""
+def init_raw_weatherstack_weather_table(
+    postgres_conn_id: str = "postgres_dw",
+) -> None:
+    """Ensure the raw_weatherstack_weather landing table exists in PostgreSQL."""
     hook = PostgresHook(postgres_conn_id=postgres_conn_id)
     with open(DDL_FILE_PATH, encoding="utf-8") as f:
         ddl = f.read()
     hook.run(ddl)
-    logger.info("Successfully ensured raw_weather table exists.")
+    logger.info("Successfully ensured raw_weatherstack_weather table exists.")
 
 
-def fetch_and_load_weather(
+def fetch_and_load_weatherstack_weather(
     city: str,
     ds: str,
     http_conn_id: str = "weatherstack_api",
@@ -42,7 +46,11 @@ def fetch_and_load_weather(
     if is_current:
         endpoint = "current"
         params = {"access_key": api_key, "query": city}
-        logger.info("Fetching current weather for city=%s on date=%s", city, ds)
+        logger.info(
+            "Fetching current weatherstack observation for city=%s on date=%s",
+            city,
+            ds,
+        )
     else:
         endpoint = "historical"
         params = {
@@ -50,7 +58,11 @@ def fetch_and_load_weather(
             "query": city,
             "historical_date": ds,
         }
-        logger.info("Fetching historical weather for city=%s on date=%s", city, ds)
+        logger.info(
+            "Fetching historical weatherstack observation for city=%s on date=%s",
+            city,
+            ds,
+        )
 
     response = hook.run(endpoint=endpoint, data=params)
     data = response.json()
@@ -68,7 +80,7 @@ def fetch_and_load_weather(
 
     # Idempotently upsert raw payload into PostgreSQL
     upsert_sql = """
-        INSERT INTO raw_weather (city, observation_date, payload, ingested_at)
+        INSERT INTO raw_weatherstack_weather (city, observation_date, payload, ingested_at)
         VALUES (%s, %s, %s, CURRENT_TIMESTAMP)
         ON CONFLICT (city, observation_date)
         DO UPDATE SET
@@ -80,4 +92,8 @@ def fetch_and_load_weather(
         upsert_sql,
         parameters=(city, ds, json.dumps(data)),
     )
-    logger.info("Successfully loaded weather payload for %s on %s", city, ds)
+    logger.info(
+        "Successfully loaded raw_weatherstack_weather payload for %s on %s",
+        city,
+        ds,
+    )
