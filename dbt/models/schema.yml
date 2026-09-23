@@ -103,5 +103,29 @@ models:
         data_tests:
           - not_null
 
+  - name: rpt_daily_weather_temperature_consensus
+    description: "Gold reporting datamart table calculating daily consensus average temperatures and variances between Open-Meteo and Weatherstack."
+    columns:
+      - name: consensus_sk
+        description: "Surrogate key for the daily consensus record."
+        data_tests:
+          - unique
+          - not_null
+      - name: city_sk
+        description: "Foreign key referencing dim_cities."
+        data_tests:
+          - not_null
+          - relationships:
+              to: ref('dim_cities')
+              field: city_sk
+      - name: observation_date
+        description: "Observation date."
+        data_tests:
+          - not_null
+      - name: avg_temperature_c
+        description: "Consensus average temperature in Celsius."
+        data_tests:
+          - not_null
+
 
 
