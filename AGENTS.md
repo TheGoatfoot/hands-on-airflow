@@ -34,9 +34,8 @@ hands-on-airflow/
 │   ├── profiles.yml       # Dual host/container connection profile
 │   ├── models/            # SQL transformation models
 │   │   ├── staging/       # Bronze: 1:1 cleaning & casting views over raw/seeds
-│   │   ├── marts/         # Dimensional & Consumption layers
-│   │   │   ├── core/      # Silver: Conformed Kimball Star Schema (dim_*, fct_*)
-│   │   │   └── reporting/ # Gold: Pre-aggregated business KPIs & rollups
+│   │   ├── core/          # Silver: Conformed Kimball Star Schema (dim_*, fct_*)
+│   │   ├── reporting/     # Gold: Pre-aggregated business KPIs & rollups
 │   │   └── schema.yml     # Model documentation, grains & data quality tests
 │   ├── seeds/             # Static lookup and test seed datasets
 │   ├── snapshots/         # dbt snapshot definitions for point-in-time / SCD2 tracking
@@ -81,10 +80,10 @@ Airflow DAGs must strictly act as **orchestrators, not execution engines**.
   - **Host**: defaults to `localhost` and port `5433`.
   - **Docker**: reads `DBT_HOST=dw-postgres` and `DBT_PORT=5432` from `docker-compose.yaml`.
 - **Layered Modeling (Medallion Mapping & Database Schemas)**:
-  - **Raw Landing (`raw` DB schema)**: Immutable landing tables (`raw.raw_*`) storing raw API payloads (JSONB) and ingestion timestamps.
-  - **Bronze (`staging` DB schema, `dbt/models/staging/`)**: Lightweight views (`+schema: staging`, `+materialized: view`) performing 1:1 cleaning, casting, and renaming over raw tables or seeds. No business aggregations or multi-hop joins.
-  - **Silver (`core` DB schema, `dbt/models/marts/core/`)**: Persistent tables (`+schema: core`, `+materialized: table` or `incremental`) housing the conformed Kimball Star Schema. Atomic facts (`fct_*`) and denormalized dimensions (`dim_*`) with surrogate keys (`<entity>_sk`) and declared grains.
-  - **Gold (`reporting` DB schema, `dbt/models/marts/reporting/`)**: Pre-aggregated consumption tables (`+schema: reporting`, `+materialized: table`) built for BI dashboards, KPIs, executive rollups, or ML feature sets (e.g. `rpt_*`, `kpi_*`). Avoid simple 1:1 pass-through views; Gold is reserved for rollups that optimize BI queries or centralize critical business calculations.
+  - **Raw Landing (`raw` DB schema)**: Immutable landing tables (`raw.<entity>`) storing raw API payloads (JSONB) and ingestion timestamps.
+  - **Bronze (`staging` DB schema, `dbt/models/staging/`)**: Lightweight views (`+schema: staging`, `+materialized: view`) performing 1:1 cleaning, casting, and renaming over raw tables or seeds (`staging.<entity>`). No business aggregations or multi-hop joins.
+  - **Silver (`core` DB schema, `dbt/models/core/`)**: Persistent tables (`+schema: core`, `+materialized: table` or `incremental`) housing the conformed Kimball Star Schema. Atomic facts (`fct_*`) and denormalized dimensions (`dim_*`) with surrogate keys (`<entity>_sk`) and declared grains.
+  - **Gold (`reporting` DB schema, `dbt/models/reporting/`)**: Pre-aggregated consumption tables (`+schema: reporting`, `+materialized: table`) built for BI dashboards, KPIs, executive rollups, or ML feature sets (e.g. `rpt_*`, `kpi_*`). Avoid simple 1:1 pass-through views; Gold is reserved for rollups that optimize BI queries or centralize critical business calculations.
 - **Data Quality Tests**: Every new model must have schema documentation, declared grains, and constraint tests (`unique`, `not_null`) defined in `schema.yml`.
 
 ### 3.3. Avoid Top-Level Code & Parse-Time Overhead
@@ -102,7 +101,7 @@ The Airflow scheduler parses every file in `dags/` periodically (every 30s as pe
 
 ## 4. Data Warehousing & Dimensional Modeling Standards
 
-Apply Kimball dimensional modeling principles across all transformation layers in `dbt/models/marts/`.
+Apply Kimball dimensional modeling principles across all transformation layers in `dbt/models/`.
 
 ### 4.1. The 4-Step Kimball Design Process
 When introducing new business domains or mart models, follow this 4-step checklist:
@@ -116,7 +115,7 @@ When introducing new business domains or mart models, follow this 4-step checkli
    - **Degenerate Dimensions**: Transactional identifier keys with no attributes of their own (e.g., `order_id`, `invoice_number`) stored directly in the fact table.
 
 ### 4.2. Star Schema Conventions (Silver Layer)
-- **Denormalized Dimensions**: Place atomic star schema models in `dbt/models/marts/core/`. Build **Star Schemas** where central fact tables join directly to flat, denormalized dimensions in a single hop.
+- **Denormalized Dimensions**: Place atomic star schema models in `dbt/models/core/`. Build **Star Schemas** where central fact tables join directly to flat, denormalized dimensions in a single hop.
 - **Avoid Snowflake Schemas**: Do not normalize dimension hierarchies into sub-tables (e.g., embed category, brand, and subcategory directly in `dim_products`).
 - **Surrogate Keys vs. Natural Keys**:
   - **Surrogate Key (`<entity>_sk`)**: Unique surrogate identifier generated specifically for the warehouse (e.g., hash of natural keys and/or validity timestamp). **Mandatory** as the primary key of dimensions and as foreign keys in fact tables.
@@ -136,10 +135,10 @@ Do **not** apply blanket SCD Type 2 across entire dimension tables. Agents must 
     - `is_current`: Boolean flag (`TRUE`/`FALSE`).
 
 ### 4.4. dbt Modeling & Snapshot Implementation
-- **Core Marts (Silver - `dbt/models/marts/core/`)**: Default core dimension models (`dim_<entity>.sql`) to clean SCD Type 1 materializations (`+materialized: table`) for performant standard BI joins.
+- **Core Marts (Silver - `dbt/models/core/`)**: Default core dimension models (`dim_<entity>.sql`) to clean SCD Type 1 materializations (`+materialized: table`) for performant standard BI joins.
 - **Historical Snapshots (`dbt/snapshots/`)**: When historical auditability or SCD Type 2 tracking is required for designated attributes, configure dbt snapshots using the `check` or `timestamp` strategy. Snapshots record point-in-time state without bloating primary reporting join paths.
 
-### 4.5. Aggregated Reporting Marts (Gold Layer - `dbt/models/marts/reporting/`)
+### 4.5. Aggregated Reporting Marts (Gold Layer - `dbt/models/reporting/`)
 - **When to build Gold models**: Only introduce models in `reporting/` when BI dashboards, executive KPIs, or analytical tools require pre-aggregated rollups (e.g., daily/monthly revenue summaries, cohort retention, complex window functions) that would otherwise cause expensive query scans against large fact tables.
 - **Avoid Pass-Through Anti-Patterns**: Never build 1:1 pass-through models in Gold that simply re-select from Silver models without transformation or aggregation. Gold models must serve a specific analytical rollup or consumption purpose.
 
@@ -297,6 +296,6 @@ uv run ruff format --check .
 5. **Respect Thin DAG patterns**: Place SQL transformations under `dbt/models/`, keeping Airflow DAGs strictly for orchestrating tasks and dependencies.
 6. **Test dbt changes locally**: Run `uv run dbt run` and `uv run dbt test` against the local warehouse before committing model changes.
 7. **Ensure Idempotency**: Use staging views and table/incremental marts with unique keys so pipelines are safely re-runnable.
-8. **Follow Kimball Star Schema & Medallion Layering**: Place 1:1 cleaning views in `staging/` (Bronze), atomic star schemas with surrogate keys (`<entity>_sk`) and declared grains in `marts/core/` (Silver), and pre-aggregated KPI/dashboard rollups in `marts/reporting/` (Gold). Assign SCD1 (overwrite) vs. SCD2 (validity tracking) on an attribute-by-attribute basis; never create empty pass-through models in Gold.
+8. **Follow Kimball Star Schema & Medallion Layering**: Place 1:1 cleaning views in `staging/` (Bronze), atomic star schemas with surrogate keys (`<entity>_sk`) and declared grains in `core/` (Silver), and pre-aggregated KPI/dashboard rollups in `reporting/` (Gold). Assign SCD1 (overwrite) vs. SCD2 (validity tracking) on an attribute-by-attribute basis; never create empty pass-through models in Gold.
 
 

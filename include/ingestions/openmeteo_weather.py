@@ -7,20 +7,18 @@ from airflow.providers.postgres.hooks.postgres import PostgresHook
 
 logger = logging.getLogger(__name__)
 
-DDL_FILE_PATH = (
-    Path(__file__).resolve().parents[1] / "sql" / "raw_openmeteo_weather.sql"
-)
+DDL_FILE_PATH = Path(__file__).resolve().parents[1] / "sql" / "openmeteo_weather.sql"
 
 
 def init_raw_openmeteo_weather_table(
     postgres_conn_id: str = "postgres_dw",
 ) -> None:
-    """Ensure the raw_openmeteo_weather landing table exists in PostgreSQL."""
+    """Ensure the raw.openmeteo_weather landing table exists in PostgreSQL."""
     hook = PostgresHook(postgres_conn_id=postgres_conn_id)
     with open(DDL_FILE_PATH, encoding="utf-8") as f:
         ddl = f.read()
     hook.run(ddl)
-    logger.info("Successfully ensured raw_openmeteo_weather table exists.")
+    logger.info("Successfully ensured raw.openmeteo_weather table exists.")
 
 
 def fetch_and_load_openmeteo_weather(
@@ -69,7 +67,7 @@ def fetch_and_load_openmeteo_weather(
         raise RuntimeError(f"Open-Meteo API Error: {reason} (city={city}, date={ds})")
 
     upsert_sql = """
-        INSERT INTO raw.raw_openmeteo_weather (city, observation_date, latitude, longitude, payload, ingested_at)
+        INSERT INTO raw.openmeteo_weather (city, observation_date, latitude, longitude, payload, ingested_at)
         VALUES (%s, %s, %s, %s, %s, CURRENT_TIMESTAMP)
         ON CONFLICT (city, observation_date)
         DO UPDATE SET
@@ -85,7 +83,7 @@ def fetch_and_load_openmeteo_weather(
         parameters=(city, ds, latitude, longitude, json.dumps(data)),
     )
     logger.info(
-        "Successfully loaded raw_openmeteo_weather payload for %s on %s",
+        "Successfully loaded raw.openmeteo_weather payload for %s on %s",
         city,
         ds,
     )

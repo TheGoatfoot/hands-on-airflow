@@ -1,5 +1,5 @@
 with source as (
-    select * from {{ source('raw', 'raw_weatherstack_weather') }}
+    select * from {{ source('raw', 'weatherstack_weather') }}
 ),
 
 extracted as (

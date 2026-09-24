@@ -1,5 +1,5 @@
 with stg as (
-    select * from {{ ref('stg_weatherstack_weather') }}
+    select * from {{ ref('weatherstack_weather') }}
 ),
 
 cities as (

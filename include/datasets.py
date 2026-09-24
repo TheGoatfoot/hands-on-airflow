@@ -12,5 +12,5 @@ Benefits:
 from airflow.datasets import Dataset
 
 # Domain: weather
-RAW_OPENMETEO_WEATHER_DATASET = Dataset("dataset://weather/raw_openmeteo_weather")
-RAW_WEATHERSTACK_WEATHER_DATASET = Dataset("dataset://weather/raw_weatherstack_weather")
+RAW_OPENMETEO_WEATHER_DATASET = Dataset("dataset://weather/openmeteo_weather")
+RAW_WEATHERSTACK_WEATHER_DATASET = Dataset("dataset://weather/weatherstack_weather")

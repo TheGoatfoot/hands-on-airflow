@@ -90,10 +90,9 @@ hands-on-airflow/
 │   ├── dbt_project.yml    # dbt project configurations & materializations
 │   ├── profiles.yml       # Dual-environment connection profile (host vs Docker)
 │   ├── models/            
-│   │   ├── staging/       # Bronze: 1:1 cleaning views over raw sources
-│   │   ├── marts/         
-│   │   │   ├── core/      # Silver: Conformed Kimball Star Schema (dim_*, fct_*)
-│   │   │   └── reporting/ # Gold: Pre-aggregated BI & analytics rollups (rpt_*)
+│   │   ├── staging/       # Bronze: 1:1 cleaning views over raw sources (schema: staging)
+│   │   ├── core/          # Silver: Conformed Kimball Star Schema (dim_*, fct_*) (schema: core)
+│   │   ├── reporting/     # Gold: Pre-aggregated BI & analytics rollups (rpt_*) (schema: reporting)
 │   │   └── schema.yml     # Model documentation, grains & data quality tests
 ├── include/               # Reusable business logic outside DAG files
 │   ├── datasets.py        # Central Airflow Dataset definitions

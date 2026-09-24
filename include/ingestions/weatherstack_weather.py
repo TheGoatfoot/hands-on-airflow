@@ -8,20 +8,18 @@ from airflow.providers.postgres.hooks.postgres import PostgresHook
 
 logger = logging.getLogger(__name__)
 
-DDL_FILE_PATH = (
-    Path(__file__).resolve().parents[1] / "sql" / "raw_weatherstack_weather.sql"
-)
+DDL_FILE_PATH = Path(__file__).resolve().parents[1] / "sql" / "weatherstack_weather.sql"
 
 
 def init_raw_weatherstack_weather_table(
     postgres_conn_id: str = "postgres_dw",
 ) -> None:
-    """Ensure the raw_weatherstack_weather landing table exists in PostgreSQL."""
+    """Ensure the raw.weatherstack_weather landing table exists in PostgreSQL."""
     hook = PostgresHook(postgres_conn_id=postgres_conn_id)
     with open(DDL_FILE_PATH, encoding="utf-8") as f:
         ddl = f.read()
     hook.run(ddl)
-    logger.info("Successfully ensured raw_weatherstack_weather table exists.")
+    logger.info("Successfully ensured raw.weatherstack_weather table exists.")
 
 
 def fetch_and_load_weatherstack_weather(
@@ -80,7 +78,7 @@ def fetch_and_load_weatherstack_weather(
 
     # Idempotently upsert raw payload into PostgreSQL
     upsert_sql = """
-        INSERT INTO raw.raw_weatherstack_weather (city, observation_date, payload, ingested_at)
+        INSERT INTO raw.weatherstack_weather (city, observation_date, payload, ingested_at)
         VALUES (%s, %s, %s, CURRENT_TIMESTAMP)
         ON CONFLICT (city, observation_date)
         DO UPDATE SET
@@ -93,7 +91,7 @@ def fetch_and_load_weatherstack_weather(
         parameters=(city, ds, json.dumps(data)),
     )
     logger.info(
-        "Successfully loaded raw_weatherstack_weather payload for %s on %s",
+        "Successfully loaded raw.weatherstack_weather payload for %s on %s",
         city,
         ds,
     )

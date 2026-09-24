@@ -1,7 +1,7 @@
 version: 2
 
 models:
-  - name: stg_weatherstack_weather
+  - name: weatherstack_weather
     description: "Bronze staging view extracting and cleaning raw Weatherstack API observation JSON payloads."
     columns:
       - name: city
@@ -63,7 +63,7 @@ models:
         data_tests:
           - not_null
 
-  - name: stg_openmeteo_weather
+  - name: openmeteo_weather
     description: "Bronze staging view extracting and cleaning raw Open-Meteo Historical Weather observations."
     columns:
       - name: city

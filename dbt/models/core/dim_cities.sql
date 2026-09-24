@@ -13,7 +13,7 @@ with weatherstack_cities as (
             partition by lower(trim(city))
             order by observation_date desc, ingested_at desc
         ) as rn
-    from {{ ref('stg_weatherstack_weather') }}
+    from {{ ref('weatherstack_weather') }}
 ),
 
 openmeteo_cities as (
@@ -30,7 +30,7 @@ openmeteo_cities as (
             partition by lower(trim(city))
             order by observation_date desc, ingested_at desc
         ) as rn
-    from {{ ref('stg_openmeteo_weather') }}
+    from {{ ref('openmeteo_weather') }}
 ),
 
 ws_latest as (
