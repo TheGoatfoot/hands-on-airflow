@@ -1,8 +1,8 @@
 version: 2
 
 models:
-  - name: weatherstack_weather
-    description: "Bronze staging view extracting and cleaning raw Weatherstack API observation JSON payloads."
+  - name: openmeteo_weather
+    description: "Bronze staging view extracting and cleaning raw Open-Meteo Historical Weather observations."
     columns:
       - name: city
         description: "Monitored city name."
@@ -12,13 +12,13 @@ models:
         description: "Date of the weather observation."
         data_tests:
           - not_null
-      - name: temperature_c
-        description: "Observed temperature in Celsius."
+      - name: temperature_2m_mean_c
+        description: "Mean daily temperature at 2 meters above ground in Celsius."
         data_tests:
           - not_null
 
   - name: dim_cities
-    description: "Conformed dimension table for weather-monitored cities across providers (Silver Layer). Grain: One row per city."
+    description: "Conformed dimension table for weather-monitored cities (Silver Layer). Grain: One row per city."
     columns:
       - name: city_sk
         description: "Surrogate key for city (MD5 hash of lowercase trimmed city name)."
@@ -36,46 +36,6 @@ models:
           - not_null
       - name: longitude
         description: "Longitude coordinate of the city."
-        data_tests:
-          - not_null
-
-  - name: fct_weatherstack_daily_weather
-    description: "Daily weather observations fact table from Weatherstack (Silver Layer). Grain: One row per city per observation date."
-    columns:
-      - name: weather_observation_sk
-        description: "Surrogate key for observation (MD5 hash of city and observation_date)."
-        data_tests:
-          - unique
-          - not_null
-      - name: city_sk
-        description: "Foreign key referencing dim_cities."
-        data_tests:
-          - not_null
-          - relationships:
-              to: ref('dim_cities')
-              field: city_sk
-      - name: observation_date
-        description: "Date of the weather observation."
-        data_tests:
-          - not_null
-      - name: temperature_c
-        description: "Observed temperature in Celsius."
-        data_tests:
-          - not_null
-
-  - name: openmeteo_weather
-    description: "Bronze staging view extracting and cleaning raw Open-Meteo Historical Weather observations."
-    columns:
-      - name: city
-        description: "Monitored city name."
-        data_tests:
-          - not_null
-      - name: observation_date
-        description: "Date of the weather observation."
-        data_tests:
-          - not_null
-      - name: temperature_2m_mean_c
-        description: "Mean daily temperature at 2 meters above ground in Celsius."
         data_tests:
           - not_null
 
@@ -102,30 +62,3 @@ models:
         description: "Mean daily temperature at 2 meters above ground in Celsius."
         data_tests:
           - not_null
-
-  - name: rpt_daily_weather_temperature_consensus
-    description: "Gold reporting datamart table calculating daily consensus average temperatures and variances between Open-Meteo and Weatherstack."
-    columns:
-      - name: consensus_sk
-        description: "Surrogate key for the daily consensus record."
-        data_tests:
-          - unique
-          - not_null
-      - name: city_sk
-        description: "Foreign key referencing dim_cities."
-        data_tests:
-          - not_null
-          - relationships:
-              to: ref('dim_cities')
-              field: city_sk
-      - name: observation_date
-        description: "Observation date."
-        data_tests:
-          - not_null
-      - name: avg_temperature_c
-        description: "Consensus average temperature in Celsius."
-        data_tests:
-          - not_null
-
-
-
