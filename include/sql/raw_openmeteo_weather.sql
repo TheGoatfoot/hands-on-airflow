@@ -1,5 +1,7 @@
 -- DDL for raw openmeteo weather landing table
-CREATE TABLE IF NOT EXISTS raw_openmeteo_weather (
+CREATE SCHEMA IF NOT EXISTS raw;
+
+CREATE TABLE IF NOT EXISTS raw.raw_openmeteo_weather (
     city VARCHAR(100) NOT NULL,
     observation_date DATE NOT NULL,
     latitude NUMERIC(8, 4),

@@ -1,5 +1,7 @@
 -- DDL for raw weatherstack weather landing table
-CREATE TABLE IF NOT EXISTS raw_weatherstack_weather (
+CREATE SCHEMA IF NOT EXISTS raw;
+
+CREATE TABLE IF NOT EXISTS raw.raw_weatherstack_weather (
     city VARCHAR(100) NOT NULL,
     observation_date DATE NOT NULL,
     payload JSONB NOT NULL,

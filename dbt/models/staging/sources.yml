@@ -3,7 +3,7 @@ version: 2
 sources:
   - name: raw
     description: "Raw landing tables in PostgreSQL Data Warehouse"
-    schema: public
+    schema: raw
     tables:
       - name: raw_weatherstack_weather
         description: "Raw API response landing table for Weatherstack observations."

@@ -69,7 +69,7 @@ def fetch_and_load_openmeteo_weather(
         raise RuntimeError(f"Open-Meteo API Error: {reason} (city={city}, date={ds})")
 
     upsert_sql = """
-        INSERT INTO raw_openmeteo_weather (city, observation_date, latitude, longitude, payload, ingested_at)
+        INSERT INTO raw.raw_openmeteo_weather (city, observation_date, latitude, longitude, payload, ingested_at)
         VALUES (%s, %s, %s, %s, %s, CURRENT_TIMESTAMP)
         ON CONFLICT (city, observation_date)
         DO UPDATE SET

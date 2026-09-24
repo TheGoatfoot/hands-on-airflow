@@ -18,7 +18,13 @@ clean-targets:
 models:
   warehouse_transforms:
     staging:
+      +schema: staging
       +materialized: view
     marts:
-      +materialized: table
+      core:
+        +schema: core
+        +materialized: table
+      reporting:
+        +schema: reporting
+        +materialized: table
 

@@ -80,10 +80,11 @@ Airflow DAGs must strictly act as **orchestrators, not execution engines**.
 - **Dual-Environment `profiles.yml`**: `dbt/profiles.yml` uses environment variables with defaults to allow identical usage across environments:
   - **Host**: defaults to `localhost` and port `5433`.
   - **Docker**: reads `DBT_HOST=dw-postgres` and `DBT_PORT=5432` from `docker-compose.yaml`.
-- **Layered Modeling (Medallion Mapping)**:
-  - **Bronze (`staging/`)**: Lightweight views (`+materialized: view`) performing 1:1 cleaning, casting, and renaming over raw tables or seeds. No business aggregations or multi-hop joins.
-  - **Silver (`marts/core/`)**: Persistent tables (`+materialized: table` or `incremental`) housing the conformed Kimball Star Schema. Atomic facts (`fct_*`) and denormalized dimensions (`dim_*`) with surrogate keys (`<entity>_sk`) and declared grains.
-  - **Gold (`marts/reporting/`)**: Pre-aggregated consumption tables (`+materialized: table`) built for BI dashboards, KPIs, executive rollups, or ML feature sets (e.g. `rpt_*`, `kpi_*`). Avoid simple 1:1 pass-through views; Gold is reserved for rollups that optimize BI queries or centralize critical business calculations.
+- **Layered Modeling (Medallion Mapping & Database Schemas)**:
+  - **Raw Landing (`raw` DB schema)**: Immutable landing tables (`raw.raw_*`) storing raw API payloads (JSONB) and ingestion timestamps.
+  - **Bronze (`staging` DB schema, `dbt/models/staging/`)**: Lightweight views (`+schema: staging`, `+materialized: view`) performing 1:1 cleaning, casting, and renaming over raw tables or seeds. No business aggregations or multi-hop joins.
+  - **Silver (`core` DB schema, `dbt/models/marts/core/`)**: Persistent tables (`+schema: core`, `+materialized: table` or `incremental`) housing the conformed Kimball Star Schema. Atomic facts (`fct_*`) and denormalized dimensions (`dim_*`) with surrogate keys (`<entity>_sk`) and declared grains.
+  - **Gold (`reporting` DB schema, `dbt/models/marts/reporting/`)**: Pre-aggregated consumption tables (`+schema: reporting`, `+materialized: table`) built for BI dashboards, KPIs, executive rollups, or ML feature sets (e.g. `rpt_*`, `kpi_*`). Avoid simple 1:1 pass-through views; Gold is reserved for rollups that optimize BI queries or centralize critical business calculations.
 - **Data Quality Tests**: Every new model must have schema documentation, declared grains, and constraint tests (`unique`, `not_null`) defined in `schema.yml`.
 
 ### 3.3. Avoid Top-Level Code & Parse-Time Overhead

@@ -25,9 +25,9 @@ flowchart LR
 
     subgraph Transformation["Transformation Layer (dbt & Cosmos)"]
         direction TB
-        RAW --> STG["Bronze: Staging Views (1:1 Clean & Cast)"]
-        STG --> MARTS["Silver: Core Marts (Kimball Star Schema: dim_*, fct_*)"]
-        MARTS --> RPT["Gold: Reporting Marts (Rollups & Aggregations)"]
+        RAW --> STG["Bronze: Staging Views (schema: staging)"]
+        STG --> MARTS["Silver: Core Marts (schema: core)"]
+        MARTS --> RPT["Gold: Reporting Marts (schema: reporting)"]
     end
 ```
 

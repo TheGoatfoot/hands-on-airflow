@@ -80,7 +80,7 @@ def fetch_and_load_weatherstack_weather(
 
     # Idempotently upsert raw payload into PostgreSQL
     upsert_sql = """
-        INSERT INTO raw_weatherstack_weather (city, observation_date, payload, ingested_at)
+        INSERT INTO raw.raw_weatherstack_weather (city, observation_date, payload, ingested_at)
         VALUES (%s, %s, %s, CURRENT_TIMESTAMP)
         ON CONFLICT (city, observation_date)
         DO UPDATE SET
